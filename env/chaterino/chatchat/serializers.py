@@ -31,7 +31,7 @@ class parcipantesSerializer(serializers.ModelSerializer):
 class mensajEnSalaDeChat(serializers.ModelSerializer):
   class Meta:
     model = mensajeEnChat
-    fields = ('username','mensaje')
+    fields = '__all__'
 
   
 

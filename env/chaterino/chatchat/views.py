@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework import permissions
 from django.contrib.auth import get_user_model
 from .models import saladeChat,participantesChat,mensajeEnChat
-from .serializers import UsuarioSerializer,salaChatSerializer,parcipantesSerializer
+from .serializers import UsuarioSerializer,salaChatSerializer,parcipantesSerializer,mensajEnSalaDeChat
 
 # Create your views here.
 class salaDeChatView(APIView):
@@ -55,17 +55,31 @@ class salaDeChatView(APIView):
     uri = kwargs['uri']
     user = request.user
     sala_chat = saladeChat.objects.get(uri = uri)
-    lmao2 = saladeChat.objects.get('mensajes')
+    rekt = mensajeEnChat.objects.filter(sala_chat = sala_chat)
+    sala2 = mensajEnSalaDeChat(rekt[1])
     sala1= salaChatSerializer(sala_chat)
-    lmao = {'user': user.username, 'mensaje':lmao2 }
+    a = 0
+
     mensajes = [
-      lmao for sala_chat_mensajes in sala_chat.mensajes.all()
+     
     ]
+  
+    while a <  len(rekt):
+      salalmao = mensajEnSalaDeChat(rekt[a])
+      lmao = {
+        'user': salalmao.data['user'],
+        'mensaje': salalmao.data['mensaje']
+      }
+      mensajes.append(lmao)
+      a += 1
+    
+    
 
     return Response({
       'id': sala_chat.id,
       'uri': sala_chat.uri,
-      'mensajes': mensajes
+      'holi': mensajes
+    
     })
 
   def post(self,request,*args,**kwargs):
