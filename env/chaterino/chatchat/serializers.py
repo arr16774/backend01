@@ -9,12 +9,12 @@ class UsuarioSerializer(serializers.ModelSerializer):
   password = serializers.CharField(write_only = True)
 
   def create(self, validated_data):
-    user = User.objects.create_user(validated_data['username'],validated_data['email'],validated_data['password'])
+    user = User.objects.create_user(validated_data['username'], validated_data['email'],validated_data['password'])
     return user
 
-    class Meta:
-      model = User
-      fields = ('username','email','password')
+  class Meta:
+    model = User
+    fields = ('id','username','email', 'password')
   
 
 class salaChatSerializer(serializers.ModelSerializer):

@@ -1,14 +1,32 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import permissions
+from rest_framework.permissions import AllowAny
+from rest_framework import permissions, generics,status
 from django.contrib.auth import get_user_model
+from notifications.signals import notify
 from .models import saladeChat,participantesChat,mensajeEnChat
 from .serializers import UsuarioSerializer,salaChatSerializer,parcipantesSerializer,mensajEnSalaDeChat
 
 # Create your views here.
-class salaDeChatView(APIView):
+
+
+class UserCreate(APIView):
+  permission_classes = (AllowAny,)
+  def post(self, request, format='json'):
+    serializer = UsuarioSerializer(data=request.data)
+    if serializer.is_valid():
+      user = serializer.save()
+      if user:
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+      else:
+        return Response("user not saved")
+    else:
+      return Response(serializer.errors)
+
+class salaDeChatView1(APIView):
   permission_classes = (permissions.IsAuthenticated,)
+  
 
   def post (self,request,*args, **kwargs):
     user = request.user
@@ -18,6 +36,8 @@ class salaDeChatView(APIView):
     return Response ({
       'Status': sala.data
     })
+
+    
 
   def patch(self, request, *args, **kwargs):
     User = get_user_model()
@@ -47,6 +67,7 @@ class salaDeChatView(APIView):
       'status': user.username
       
     })
+    
 
 class salaDeChatView(APIView):
   permissions_classses = (permissions.IsAuthenticated,)
@@ -91,6 +112,16 @@ class salaDeChatView(APIView):
       user = user, sala_chat = sala_chat, mensaje =mensaje
 
     )
+    
+    notif_args = {
+      'source': user,
+      'source_display_name': user.get_full_name(),
+      'category': 'chat', 'action': 'Sent',
+      'obj': chat_session_message.id,
+      'short_description': 'You a new message', 'silent': True,
+      'extra_data': {'uri': chat_session.uri}
+      }
+    notify.send(sender=self.__class__, **notif_args, channels=['websocket'])
 
     return Response({
       'mensaje': mensaje
